@@ -2,6 +2,7 @@ const express = require("express");
 const puppeteer = require("puppeteer");
 const cors = require("cors");
 const app = express();
+let myAllCafeList = null;
 
 app.use(express.json());
 app.use(cors({ origin: "http://localhost:5173" }));
@@ -17,7 +18,7 @@ const loginHelper = async () => {
     });
     await page.setViewport({ width: 1080, height: 1024 });
 
-    await page.goto("https://nid.naver.com/nidlogin.login");
+    await page.goto("https://nid.naver.com/nidlogin.login", { timeout: 30000 * 2 });
     await page.waitForNavigation();
 
     const browserContext = browser.defaultBrowserContext();
@@ -36,6 +37,7 @@ const startCrawling = async (cookies) => {
   try {
     const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
+    let listMoreBtn = true;
 
     await page.setCookie(...cookies);
     await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36");
@@ -45,10 +47,35 @@ const startCrawling = async (cookies) => {
     await page.setViewport({ width: 1080, height: 1024 });
 
     await page.goto("https://section.cafe.naver.com/ca-fe/home");
+    await page.waitForSelector(".mycafe_list", { timeout: 57 });
+
+    while (listMoreBtn) {
+      try {
+        await page.waitForSelector(".btn_item_more", { visible: true, timeout: 3000 });
+        await page.click(".btn_item_more", { delay: 103 });
+      } catch {
+        listMoreBtn = false;
+      }
+    }
+
+    const getMyAllCafeList = await page.evaluate(() => {
+      const cafeList = document.querySelectorAll(".mycafe_info");
+
+      return Array.from(cafeList).map(info => {
+        const cafeName = info.querySelector("a").href;
+        const cafeLink = info.querySelector("a").textContent;
+
+        return (
+          { cafeName, cafeLink }
+        );
+      });
+    });
+    myAllCafeList = getMyAllCafeList;
+
     await browser.close();
 
     return (
-      { success: true, message: "네이버 카페 크롤링 성공" }
+      { success: true, message: myAllCafeList }
     );
   } catch (err) {
     throw new Error (`크롤링 로직 에러 = ${err.message}`);
