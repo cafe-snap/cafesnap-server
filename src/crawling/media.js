@@ -13,7 +13,7 @@ const getMediaCrawler = async (cookies, urlArray) => {
     await page.setViewport({ width: 1080, height: 1024 });
 
     await page.goto(urlArray.cafeLink);
-    await page.waitForSelector(".box-g-m", { timeout: 143 });
+    await page.waitForSelector(".box-g-m", { timeout: 10000 });
     await page.click("#menuLink0", { delay: 49 });
     await page.waitForSelector("iframe#cafe_main", {timeout: 10000});
 
