@@ -2,7 +2,7 @@ const puppeteer = require("puppeteer");
 
 const getMediaCrawler = async (cookies, urlArray) => {
   try {
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
     await page.setCookie(...cookies);
@@ -25,7 +25,8 @@ const getMediaCrawler = async (cookies, urlArray) => {
       const articleList = document.querySelectorAll(".board-list");
       const resultArray = [];
 
-      articleList.forEach((list) => {
+      for (let i = 0; i < articleList.length; i++) {
+        const list = articleList[i];
         const haveMedia = list.querySelector(".list-i-img, .list-i-movie");
 
         if (haveMedia) {
@@ -37,9 +38,14 @@ const getMediaCrawler = async (cookies, urlArray) => {
               postLink: articleLink.href,
               postName: articleLink.textContent.replace(/[\n\t]+/g, "").trim(),
             });
+
+            if (resultArray.length >= 5) {
+              break;
+            }
           }
         }
-      });
+      }
+
 
       return (
         resultArray
