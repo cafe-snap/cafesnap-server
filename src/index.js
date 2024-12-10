@@ -3,6 +3,7 @@ const puppeteer = require("puppeteer");
 const cors = require("cors");
 const app = express();
 let myAllCafeList = null;
+let cookiesFromLogin = null;
 
 app.use(express.json());
 app.use(cors({ origin: "http://localhost:5173" }));
@@ -47,7 +48,7 @@ const startCrawling = async (cookies) => {
     await page.setViewport({ width: 1080, height: 1024 });
 
     await page.goto("https://section.cafe.naver.com/ca-fe/home");
-    await page.waitForSelector(".mycafe_list", { timeout: 57 });
+    await page.waitForSelector(".mycafe_list", { timeout: 128 });
 
     while (listMoreBtn) {
       try {
@@ -62,8 +63,8 @@ const startCrawling = async (cookies) => {
       const cafeList = document.querySelectorAll(".mycafe_info");
 
       return Array.from(cafeList).map(info => {
-        const cafeName = info.querySelector("a").href;
-        const cafeLink = info.querySelector("a").textContent;
+        const cafeLink = info.querySelector("a").href;
+        const cafeName = info.querySelector("a").textContent;
 
         return (
           { cafeName, cafeLink }
@@ -82,11 +83,21 @@ const startCrawling = async (cookies) => {
   }
 };
 
-app.post("/main", async (_,res) => {
+app.post("/login", async (_, res) => {
   try {
-    const cookiesFromLogin = await loginHelper();
-    const cafeData = await startCrawling(cookiesFromLogin);
+    cookiesFromLogin = await loginHelper();
 
+    if (cookiesFromLogin !== null) {
+      res.json({ success: true, message: "로그인 성공" });
+    }
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.post("/crowling", async (_, res) => {
+  try {
+    const cafeData = await startCrawling(cookiesFromLogin);
     res.json(cafeData);
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
