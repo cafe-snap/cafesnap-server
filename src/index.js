@@ -24,7 +24,7 @@ app.post("/login", async (_, res) => {
 app.post("/crowling", async (_, res) => {
   try {
     const cafeUrl = await getCafeUrlCrawler(cookiesFromLogin);
-    const resultInfo = await getMediaCrawler(cookiesFromLogin, cafeUrl.message[1].cafeLink);
+    const resultInfo = await getMediaCrawler(cookiesFromLogin, cafeUrl.message[1]);
     res.json(resultInfo);
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

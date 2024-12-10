@@ -12,7 +12,7 @@ const getMediaCrawler = async (cookies, urlArray) => {
     });
     await page.setViewport({ width: 1080, height: 1024 });
 
-    await page.goto(urlArray);
+    await page.goto(urlArray.cafeLink);
     await page.waitForSelector(".box-g-m", { timeout: 143 });
     await page.click("#menuLink0", { delay: 49 });
     await page.waitForSelector("iframe#cafe_main", {timeout: 10000});
@@ -21,7 +21,7 @@ const getMediaCrawler = async (cookies, urlArray) => {
     const iframe = await iframeGetter.contentFrame();
     await iframe.waitForSelector(".board-list", { timeout: 10000 });
 
-    const getArticleInfo = await iframe.evaluate(() => {
+    const getArticleInfo = await iframe.evaluate((urlArray) => {
       const articleList = document.querySelectorAll(".board-list");
       const resultArray = [];
 
@@ -33,8 +33,9 @@ const getMediaCrawler = async (cookies, urlArray) => {
 
           if (articleLink) {
             resultArray.push({
-              cafeLink: articleLink.href,
-              cafeName: articleLink.textContent,
+              cafeName: urlArray.cafeName,
+              postLink: articleLink.href,
+              postName: articleLink.textContent.replace(/[\n\t]+/g, "").trim(),
             });
           }
         }
@@ -43,12 +44,12 @@ const getMediaCrawler = async (cookies, urlArray) => {
       return (
         resultArray
       );
-    });
+    }, urlArray);
 
     await browser.close();
 
     return (
-      { success: true, message: getArticleInfo}
+      { success: true, message: getArticleInfo }
     );
   } catch (err) {
     throw new Error(`카페별 미디어 크롤링 로직 에러 = ${err.message}`);
