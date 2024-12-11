@@ -17,11 +17,11 @@ const getMediaResource = async (cookies, cafeInfoArray) => {
       for (const detailInfo of cafeInfo.message) {
         try {
           await page.goto(detailInfo.postLink, { waitUntil: "domcontentloaded" });
-          await page.waitForSelector("iframe#cafe_main", { timeout: 10000 });
+          await page.waitForSelector("iframe#cafe_main", { timeout: 30000 * 2 });
 
           const iframeGetter = await page.$("iframe#cafe_main");
           const iframe = await iframeGetter.contentFrame();
-          await iframe.waitForSelector(".article_container", { timeout: 10000 });
+          await iframe.waitForSelector(".article_container", { timeout: 30000 * 2 });
 
           const imgSrc = await iframe.$eval("div.article_viewer img",
             (img) => img.getAttribute("src")
@@ -31,8 +31,16 @@ const getMediaResource = async (cookies, cafeInfoArray) => {
             (video) => video.getAttribute("src")
           ).catch(() => null);
 
-          mediaSrcList.push(imgSrc);
-          mediaSrcList.push(videoSrc);
+          const combinedMediaInfo = [imgSrc, videoSrc]
+            .filter((src) => src !== null)
+            .map((src) => ({
+              src,
+              cafeName: detailInfo.cafeName,
+              postName: detailInfo.postName,
+              postLink: detailInfo.postLink,
+            }));
+
+          mediaSrcList.push(...combinedMediaInfo);
         } catch (err) {
           throw new Error(`미디어 리소스 추출 내부로직 에러발생 = ${err.message}`);
         }

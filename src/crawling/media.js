@@ -13,13 +13,13 @@ const getMediaCrawler = async (cookies, urlArray) => {
     await page.setViewport({ width: 1080, height: 1024 });
 
     await page.goto(urlArray.cafeLink);
-    await page.waitForSelector(".box-g-m", { timeout: 10000 });
+    await page.waitForSelector(".box-g-m", { timeout: 30000 * 2 });
     await page.click("#menuLink0", { delay: 49 });
-    await page.waitForSelector("iframe#cafe_main", {timeout: 10000});
+    await page.waitForSelector("iframe#cafe_main", {timeout: 30000 * 2});
 
     const iframeGetter = await page.$("iframe#cafe_main");
     const iframe = await iframeGetter.contentFrame();
-    await iframe.waitForSelector(".board-list", { timeout: 30000 });
+    await iframe.waitForSelector(".board-list", { timeout: 30000 * 2});
 
     const getArticleInfo = await iframe.evaluate((urlArray) => {
       const articleList = document.querySelectorAll(".board-list");

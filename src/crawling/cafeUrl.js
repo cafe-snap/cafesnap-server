@@ -14,7 +14,7 @@ const getCafeUrlCrawler = async (cookies) => {
     await page.setViewport({ width: 1080, height: 1024 });
 
     await page.goto("https://section.cafe.naver.com/ca-fe/home");
-    await page.waitForSelector(".mycafe_list", { timeout: 10000 });
+    await page.waitForSelector(".mycafe_list", { timeout: 30000 * 2 });
 
     while (listMoreBtn) {
       try {
