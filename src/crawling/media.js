@@ -19,7 +19,7 @@ const getMediaCrawler = async (cookies, urlArray) => {
 
     const iframeGetter = await page.$("iframe#cafe_main");
     const iframe = await iframeGetter.contentFrame();
-    await iframe.waitForSelector(".board-list", { timeout: 10000 });
+    await iframe.waitForSelector(".board-list", { timeout: 30000 });
 
     const getArticleInfo = await iframe.evaluate((urlArray) => {
       const articleList = document.querySelectorAll(".board-list");
@@ -46,12 +46,10 @@ const getMediaCrawler = async (cookies, urlArray) => {
         }
       }
 
-
       return (
         resultArray
       );
     }, urlArray);
-
     await browser.close();
 
     return (

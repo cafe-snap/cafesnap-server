@@ -2,7 +2,7 @@ const puppeteer = require("puppeteer");
 
 const getCafeUrlCrawler = async (cookies) => {
   try {
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
     let listMoreBtn = true;
 
@@ -14,7 +14,7 @@ const getCafeUrlCrawler = async (cookies) => {
     await page.setViewport({ width: 1080, height: 1024 });
 
     await page.goto("https://section.cafe.naver.com/ca-fe/home");
-    await page.waitForSelector(".mycafe_list", { timeout: 1000 });
+    await page.waitForSelector(".mycafe_list", { timeout: 10000 });
 
     while (listMoreBtn) {
       try {
@@ -44,7 +44,7 @@ const getCafeUrlCrawler = async (cookies) => {
       { success: true, message: getMyAllCafeList }
     );
   } catch (err) {
-    throw new Error (`크롤링 로직 에러 = ${err.message}`);
+    throw new Error (`가입 카페목록 크롤링 로직 에러 = ${err.message}`);
   }
 };
 
