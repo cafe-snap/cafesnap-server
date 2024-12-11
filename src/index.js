@@ -3,6 +3,7 @@ const cors = require("cors");
 const loginCrawler = require("../src/crawling/login.js");
 const getCafeUrlCrawler = require("../src/crawling/cafeUrl.js");
 const getMediaCrawler = require("../src/crawling/media.js");
+const getMediaResource = require("../src/crawling/source.js");
 const app = express();
 let cookiesFromLogin = null;
 
@@ -24,10 +25,12 @@ app.post("/login", async (_, res) => {
 app.post("/crowling", async (_, res) => {
   try {
     const cafeUrl = await getCafeUrlCrawler(cookiesFromLogin);
-    const resultInfo = await Promise.all(
+    const mediaArticleUrl = await Promise.all(
       cafeUrl.message.map((cafeInfo) => getMediaCrawler(cookiesFromLogin, cafeInfo))
     );
-    res.json({ success: true, resultInfo });
+
+    const mediaResource = await getMediaResource(cookiesFromLogin, mediaArticleUrl);
+    res.json({ success: true, mediaResource });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
