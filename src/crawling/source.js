@@ -16,32 +16,61 @@ const getMediaResource = async (cookies, cafeInfoArray) => {
     for (const cafeInfo of cafeInfoArray) {
       for (const detailInfo of cafeInfo.message) {
         try {
+          let videoSrcList = [];
+
+          const interceptSrcNetwork = async (response) => {
+            const requestUrl = response.url();
+            if (requestUrl.includes("apis.naver.com/rmcnmv/rmcnmv/vod/play")) {
+              try {
+                const responseJson = await response.json();
+                const videoList = responseJson.videos?.list;
+
+                if (videoList && Array.isArray(videoList)) {
+                  const videoQuality = videoList.find((v) => v.encodingOption.name === "720p")
+                    || videoList.find((v) => v.encodingOption.name === "480p")
+                    || videoList.find((v) => v.encodingOption.name === "270p");
+
+                  if (videoQuality && videoQuality.source) {
+                    videoSrcList.push(videoQuality.source);
+                  }
+                }
+              } catch (err) {
+                throw new Error(`동영상 리소스 추출중 네트워크 응답 실패: ${err.message}`);
+              }
+            }
+          };
+
+          page.on("response", interceptSrcNetwork);
           await page.goto(detailInfo.postLink, { waitUntil: "domcontentloaded" });
           await page.waitForSelector("iframe#cafe_main", { timeout: 30000 * 2 });
-
           const iframeGetter = await page.$("iframe#cafe_main");
+          if (!iframeGetter) {
+            continue;
+          }
           const iframe = await iframeGetter.contentFrame();
+          if (!iframe) {
+            continue;
+          }
           await iframe.waitForSelector(".article_container", { timeout: 30000 * 2 });
+          await iframe.waitForSelector(".prismplayer-area", { timeout: 30000 * 2 });
 
           const imgSrc = await iframe.$$eval("div.article_viewer img",
             (imgs) => imgs.map((img) => img.getAttribute("src"))
           ).catch(() => []);
 
-          const videoSrc = await iframe.$eval("video",
-            (videos) => videos.map((video) => video.getAttribute("src"))
-          ).catch(() => ["목업 src"]);
+          await new Promise((resolve) => setTimeout(resolve, 2000));
 
-          const combinedMediaInfo = [...imgSrc, ...videoSrc]
-            .map((src) => ({
-              src,
-              cafeName: detailInfo.cafeName,
-              postName: detailInfo.postName,
-              postLink: detailInfo.postLink,
-            }));
+          const combinedMediaInfo = [...imgSrc, ...videoSrcList].map((src) => ({
+            src,
+            cafeName: detailInfo.cafeName,
+            postName: detailInfo.postName,
+            postLink: detailInfo.postLink,
+          }));
 
           mediaSrcList.push(...combinedMediaInfo);
+          page.off("response", interceptSrcNetwork);
         } catch (err) {
-          throw new Error(`미디어 리소스 추출 내부로직 에러발생 = ${err.message}`);
+          throw new Error(`동영상 리소스 추출중 네트워크 성공후 로직에러 발생: ${err.message}`);
         }
       }
     }
@@ -58,11 +87,9 @@ const getMediaResource = async (cookies, cafeInfoArray) => {
       }, {})
     );
 
-    return (
-      { success: true, message: groupedByCafe }
-    );
+    return { success: true, message: groupedByCafe };
   } catch (err) {
-    throw new Error(`미디어 리소스 추출 에러 = ${err.message}`);
+    throw new Error(`미디어 리소스 추출 에러: ${err.message}`);
   }
 };
 
