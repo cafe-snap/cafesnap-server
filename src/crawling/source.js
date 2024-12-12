@@ -47,8 +47,19 @@ const getMediaResource = async (cookies, cafeInfoArray) => {
     }
 
     await browser.close();
+
+    const groupedByCafe = Object.values(
+      mediaSrcList.reduce((acc, info) => {
+        if (!acc[info.cafeName]) {
+          acc[info.cafeName] = [];
+        }
+        acc[info.cafeName].push(info);
+        return acc;
+      }, {})
+    );
+
     return (
-      { success: true, message: mediaSrcList }
+      { success: true, message: groupedByCafe }
     );
   } catch (err) {
     throw new Error(`미디어 리소스 추출 에러 = ${err.message}`);
