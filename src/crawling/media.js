@@ -1,6 +1,6 @@
 const puppeteer = require("puppeteer");
 
-const getMediaCrawler = async (cookies, urlArray) => {
+const getMediaCrawler = async (cookies, cafeInfo) => {
   try {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
@@ -12,49 +12,75 @@ const getMediaCrawler = async (cookies, urlArray) => {
     });
     await page.setViewport({ width: 1080, height: 1024 });
 
-    await page.goto(urlArray.cafeLink);
+    await page.goto(cafeInfo.cafeLink);
     await page.waitForSelector(".box-g-m", { timeout: 30000 * 2 });
     await page.click("#menuLink0", { delay: 49 });
-    await page.waitForSelector("iframe#cafe_main", {timeout: 30000 * 2});
+    await page.waitForSelector("iframe#cafe_main", { timeout: 30000 * 2 });
 
-    const iframeGetter = await page.$("iframe#cafe_main");
-    const iframe = await iframeGetter.contentFrame();
-    await iframe.waitForSelector(".board-list", { timeout: 30000 * 2});
+    let returnResultArray = [];
+    let currentPageIndex = 1;
+    const iframeElement = await page.$("iframe#cafe_main");
+    let iframe = await iframeElement.contentFrame();
 
-    const getArticleInfo = await iframe.evaluate((urlArray) => {
-      const articleList = document.querySelectorAll(".board-list");
-      const resultArray = [];
+    while ((returnResultArray.length < 6) && (currentPageIndex <= 20)) {
+      await iframe.waitForSelector(".board-list", { timeout: 30000 * 2 });
 
-      for (let i = 0; i < articleList.length; i++) {
-        const list = articleList[i];
-        const haveMedia = list.querySelector(".list-i-img, .list-i-movie");
+      const articles = await iframe.evaluate(() => {
+        const resultArray = [];
+        const articleList = document.querySelectorAll(".board-list");
 
-        if (haveMedia) {
+        articleList.forEach((list) => {
+          const haveMedia = list.querySelector(".list-i-movie");
           const articleLink = list.querySelector("a.article");
 
-          if (articleLink) {
+          if (haveMedia && articleLink) {
             resultArray.push({
-              cafeName: urlArray.cafeName,
               postLink: articleLink.href,
               postName: articleLink.textContent.replace(/[\n\t]+/g, "").trim(),
             });
-
-            if (resultArray.length >= 5) {
-              break;
-            }
           }
-        }
+        });
+        return resultArray;
+      });
+
+      returnResultArray = returnResultArray.concat(
+        articles.map((article) => ({
+          cafeName: cafeInfo.cafeName,
+          ...article,
+        }))
+      );
+
+      if (returnResultArray.length >= 6) {
+        break;
       }
 
-      return (
-        resultArray
-      );
-    }, urlArray);
+      await iframe.waitForSelector(".prev-next");
+      const paginationExists = await iframe.$(".prev-next");
+      if (paginationExists) {
+        const paginationLinks = await iframe.$$(".prev-next a");
+
+        if (currentPageIndex < paginationLinks.length) {
+          const nextPageHref = await paginationLinks[currentPageIndex].evaluate(
+            (link) => link.href
+          );
+
+          if (nextPageHref) {
+            await page.goto(nextPageHref, { waitUntil: "networkidle2" });
+            currentPageIndex++;
+            iframe = await (await page.$("iframe#cafe_main")).contentFrame();
+          } else {
+            break;
+          }
+        } else {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
     await browser.close();
 
-    return (
-      { success: true, message: getArticleInfo }
-    );
+    return { success: true, message: returnResultArray };
   } catch (err) {
     throw new Error(`카페별 미디어 크롤링 로직 에러 = ${err.message}`);
   }
