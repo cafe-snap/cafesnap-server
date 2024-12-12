@@ -23,16 +23,15 @@ const getMediaResource = async (cookies, cafeInfoArray) => {
           const iframe = await iframeGetter.contentFrame();
           await iframe.waitForSelector(".article_container", { timeout: 30000 * 2 });
 
-          const imgSrc = await iframe.$eval("div.article_viewer img",
-            (img) => img.getAttribute("src")
-          ).catch(() => null);
+          const imgSrc = await iframe.$$eval("div.article_viewer img",
+            (imgs) => imgs.map((img) => img.getAttribute("src"))
+          ).catch(() => []);
 
           const videoSrc = await iframe.$eval("video",
-            (video) => video.getAttribute("src")
-          ).catch(() => null);
+            (videos) => videos.map((video) => video.getAttribute("src"))
+          ).catch(() => ["목업 src"]);
 
-          const combinedMediaInfo = [imgSrc, videoSrc]
-            .filter((src) => src !== null)
+          const combinedMediaInfo = [...imgSrc, ...videoSrc]
             .map((src) => ({
               src,
               cafeName: detailInfo.cafeName,
