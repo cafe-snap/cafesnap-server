@@ -77,15 +77,13 @@ const getMediaResource = async (cookies, cafeInfoArray) => {
 
     await browser.close();
 
-    const groupedByCafe = Object.values(
-      mediaSrcList.reduce((acc, info) => {
-        if (!acc[info.cafeName]) {
-          acc[info.cafeName] = [];
-        }
-        acc[info.cafeName].push(info);
-        return acc;
-      }, {})
-    );
+    const groupedByCafe = mediaSrcList.reduce((acc, info) => {
+      if (!acc[info.cafeName]) {
+        acc[info.cafeName] = [];
+      }
+      acc[info.cafeName].push(info);
+      return acc;
+    }, {});
 
     return { success: true, message: groupedByCafe };
   } catch (err) {
