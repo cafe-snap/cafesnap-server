@@ -60,12 +60,22 @@ const getMediaResource = async (cookies, cafeInfoArray) => {
 
           await new Promise((resolve) => setTimeout(resolve, 2000));
 
-          const combinedMediaInfo = [...imgSrc, ...videoSrcList].map((src) => ({
-            src,
-            cafeName: detailInfo.cafeName,
-            postName: detailInfo.postName,
-            postLink: detailInfo.postLink,
-          }));
+          const combinedMediaInfo = [
+            ...imgSrc.map((src) => ({
+              src,
+              type: "img",
+              cafeName: detailInfo.cafeName,
+              postName: detailInfo.postName,
+              postLink: detailInfo.postLink,
+            })),
+            ...videoSrcList.map((src) => ({
+              src,
+              type: "video",
+              cafeName: detailInfo.cafeName,
+              postName: detailInfo.postName,
+              postLink: detailInfo.postLink,
+            })),
+          ];
 
           mediaSrcList.push(...combinedMediaInfo);
           page.off("response", interceptSrcNetwork);
