@@ -41,7 +41,7 @@ const getCafeUrlCrawler = async (cookies) => {
     await browser.close();
 
     return (
-      { success: true, message: getMyAllCafeList }
+      getMyAllCafeList
     );
   } catch (err) {
     throw new Error (`가입 카페목록 크롤링 로직 에러 = ${err.message}`);

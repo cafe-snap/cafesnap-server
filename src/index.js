@@ -1,9 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const loginCrawler = require("../src/crawling/login.js");
+const getInitialResource = require("../src/crawling/initial.js");
 const getCafeUrlCrawler = require("../src/crawling/cafeUrl.js");
 const getMediaCrawler = require("../src/crawling/media.js");
-const getMediaResource = require("../src/crawling/source.js");
 const app = express();
 let cookiesFromLogin = null;
 
@@ -15,22 +15,19 @@ app.post("/login", async (_, res) => {
     cookiesFromLogin = await loginCrawler();
 
     if (cookiesFromLogin !== null) {
-      res.json({ success: true, message: "로그인 성공" });
+      res.json({ success: true });
     }
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });
 
-app.post("/crowling", async (_, res) => {
+app.post("/posts/initial", async (_, res) => {
   try {
-    const cafeUrl = await getCafeUrlCrawler(cookiesFromLogin);
-    const mediaArticleUrl = await Promise.all(
-      cafeUrl.message.map((cafeInfo) => getMediaCrawler(cookiesFromLogin, cafeInfo))
-    );
-
-    const mediaResource = await getMediaResource(cookiesFromLogin, mediaArticleUrl);
-    res.json({ success: true, mediaResource });
+    const cafeUrlList = await getCafeUrlCrawler(cookiesFromLogin);
+    const initialMediaList = await getMediaCrawler(cookiesFromLogin, cafeUrlList[0]);
+    const mediaResource = await getInitialResource(cookiesFromLogin, initialMediaList.message);
+    res.json({ success: true, message: {cafeUrlList, mediaResource} });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
