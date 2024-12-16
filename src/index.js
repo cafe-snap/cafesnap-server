@@ -33,4 +33,20 @@ app.post("/posts/initial", async (_, res) => {
   }
 });
 
+app.post("/posts/selection", async (req, res) => {
+  try {
+    const url = req.body;
+    if (!url) {
+      return (
+        res.status(400).json({ success: false, message: "url 수신 실패" })
+      );
+    }
+    const initialMediaList = await getMediaCrawler(cookiesFromLogin, url);
+    const mediaResource = await getInitialResource(cookiesFromLogin, initialMediaList.message);
+    res.json({ success: true, message: mediaResource });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 app.listen(3000);
