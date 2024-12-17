@@ -5,6 +5,7 @@ const getInitialResource = require("../src/crawling/initial.js");
 const getCafeUrlCrawler = require("../src/crawling/cafeUrl.js");
 const getMediaCrawler = require("../src/crawling/media.js");
 const getKeywordCrawler = require("../src/crawling/keyword.js");
+const getadditionMediaCrawler = require("../src/crawling/additionMedia.js");
 const app = express();
 let cookiesFromLogin = null;
 
@@ -27,8 +28,9 @@ app.post("/posts/initial", async (_, res) => {
   try {
     const cafeUrlList = await getCafeUrlCrawler(cookiesFromLogin);
     const initialMediaList = await getMediaCrawler(cookiesFromLogin, cafeUrlList[0]);
+    const returnUrl = initialMediaList.returnUrl;
     const mediaResource = await getInitialResource(cookiesFromLogin, initialMediaList.message);
-    res.json({ success: true, message: {cafeUrlList, mediaResource} });
+    res.json({ success: true, message: { cafeUrlList, mediaResource, returnUrl }});
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -43,8 +45,9 @@ app.post("/posts/selection", async (req, res) => {
       );
     }
     const initialMediaList = await getMediaCrawler(cookiesFromLogin, url);
+    const returnUrl = initialMediaList.returnUrl;
     const mediaResource = await getInitialResource(cookiesFromLogin, initialMediaList.message);
-    res.json({ success: true, message: mediaResource });
+    res.json({ success: true, message: { mediaResource, returnUrl }});
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -61,6 +64,23 @@ app.post("/posts/keyword", async (req, res) => {
     const mediaList = await getKeywordCrawler(cookiesFromLogin, cafeInfo, keyword);
     const mediaResource = await getInitialResource(cookiesFromLogin, mediaList.message);
     res.json({ success: true, message: mediaResource });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.post("/posts/addition", async (req, res) => {
+  try {
+    const { nextUrl, cafeInfo }  = req.body;
+    if (!nextUrl || !cafeInfo) {
+      return (
+        res.status(400).json({ success: false, message: "데이터 수신 실패" })
+      );
+    }
+    const MediaList = await getadditionMediaCrawler(cookiesFromLogin, nextUrl, cafeInfo);
+    const returnUrl = MediaList.returnUrl;
+    const mediaResource = await getInitialResource(cookiesFromLogin, MediaList.message);
+    res.json({ success: true, message: { mediaResource, returnUrl }});
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
