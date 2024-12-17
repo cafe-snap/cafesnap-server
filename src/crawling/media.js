@@ -21,6 +21,7 @@ const getMediaCrawler = async (cookies, cafeInfo) => {
     let currentPageIndex = 1;
     const iframeElement = await page.$("iframe#cafe_main");
     let iframe = await iframeElement.contentFrame();
+    const urlMarker = [];
 
     while ((returnResultArray.length < 6) && (currentPageIndex <= 20)) {
       await iframe.waitForSelector(".board-list", { timeout: 30000 * 2 });
@@ -65,6 +66,7 @@ const getMediaCrawler = async (cookies, cafeInfo) => {
           );
 
           if (nextPageHref) {
+            urlMarker.push(nextPageHref);
             await page.goto(nextPageHref, { waitUntil: "networkidle2" });
             currentPageIndex++;
             iframe = await (await page.$("iframe#cafe_main")).contentFrame();
@@ -80,7 +82,9 @@ const getMediaCrawler = async (cookies, cafeInfo) => {
     }
     await browser.close();
 
-    return { success: true, message: returnResultArray };
+    const returnUrl = (urlMarker.length > 1) ? urlMarker[urlMarker.length - 2] : null;
+
+    return { success: true, message: returnResultArray, returnUrl };
   } catch (err) {
     throw new Error(`카페별 미디어 크롤링 로직 에러 = ${err.message}`);
   }
