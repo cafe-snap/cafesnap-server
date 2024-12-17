@@ -4,6 +4,7 @@ const loginCrawler = require("../src/crawling/login.js");
 const getInitialResource = require("../src/crawling/initial.js");
 const getCafeUrlCrawler = require("../src/crawling/cafeUrl.js");
 const getMediaCrawler = require("../src/crawling/media.js");
+const getKeywordCrawler = require("../src/crawling/keyword.js");
 const app = express();
 let cookiesFromLogin = null;
 
@@ -43,6 +44,22 @@ app.post("/posts/selection", async (req, res) => {
     }
     const initialMediaList = await getMediaCrawler(cookiesFromLogin, url);
     const mediaResource = await getInitialResource(cookiesFromLogin, initialMediaList.message);
+    res.json({ success: true, message: mediaResource });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.post("/posts/keyword", async (req, res) => {
+  try {
+    const { keyword, cafeInfo } = req.body;
+    if (!keyword || !cafeInfo) {
+      return (
+        res.status(400).json({ success: false, message: "데이터 수신 실패" })
+      );
+    }
+    const mediaList = await getKeywordCrawler(cookiesFromLogin, cafeInfo, keyword);
+    const mediaResource = await getInitialResource(cookiesFromLogin, mediaList.message);
     res.json({ success: true, message: mediaResource });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
