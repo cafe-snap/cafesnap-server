@@ -2,6 +2,7 @@ const puppeteer = require("puppeteer");
 
 const loginCrawler = async () => {
   try {
+    dotenv.config();
     const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
 
@@ -12,7 +13,12 @@ const loginCrawler = async () => {
     await page.setViewport({ width: 1080, height: 1024 });
 
     await page.goto("https://nid.naver.com/nidlogin.login", { timeout: 30000 * 2 });
-    await page.waitForNavigation();
+    await page.click(".switch_btn", {delay: 100}),
+    await page.type("#id", process.env.NAVER_ID, { delay: 321 });
+    await page.type("#pw", process.env.NAVER_PW, { delay: 264 } );
+    await page.click(".btn_login", { delay: 117 });
+    await page.waitForNavigation({ waitUntil: "networkidle2" });
+
 
     const browserContext = browser.defaultBrowserContext();
     const cookieList = await browserContext.cookies();
