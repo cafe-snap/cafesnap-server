@@ -27,13 +27,25 @@ const getCafeUrlCrawler = async (cookies) => {
 
     const getMyAllCafeList = await page.evaluate(() => {
       const cafeList = document.querySelectorAll(".mycafe_info");
+      const cafeLogo = document.querySelectorAll(".mycafe_area");
+
+      const logoData = Array.from(cafeLogo).map(logo => {
+        const areaLink = logo.querySelector("a")?.href || null;
+        const logoSrc = logo.querySelector("img")?.src || null;
+        return (
+          { areaLink, logoSrc }
+        );
+      });
 
       return Array.from(cafeList).map(info => {
         const cafeLink = info.querySelector("a").href;
         const cafeName = info.querySelector("a").textContent;
 
+        const matchedArea = logoData.find(area => area.areaLink === cafeLink);
+        const cafeLogo = matchedArea?.logoSrc || null;
+
         return (
-          { cafeName, cafeLink }
+          { cafeName, cafeLink, cafeLogo }
         );
       });
     });
