@@ -56,7 +56,7 @@ const getCafeUrlCrawler = async (cookies) => {
       getMyAllCafeList
     );
   } catch (err) {
-    throw new Error (`가입 카페목록 크롤링 로직 에러 = ${err.message}`);
+    console.error(`가입 카페목록 크롤링 로직 에러 = ${err.message}`);
   }
 };
 
