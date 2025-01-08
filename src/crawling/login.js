@@ -1,4 +1,5 @@
 const puppeteer = require("puppeteer");
+const dotenv = require("dotenv");
 
 const loginCrawler = async () => {
   try {

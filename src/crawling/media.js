@@ -23,7 +23,7 @@ const getMediaCrawler = async (cookies, cafeInfo) => {
     let iframe = await iframeElement.contentFrame();
     const urlMarker = [];
 
-    while ((returnResultArray.length < 6) && (currentPageIndex <= 20)) {
+    while ((returnResultArray.length < 6) && (currentPageIndex <= 30)) {
       await iframe.waitForSelector(".board-list", { timeout: 30000 * 2 });
 
       const articles = await iframe.evaluate(() => {
