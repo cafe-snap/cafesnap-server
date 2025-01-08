@@ -10,7 +10,7 @@ const app = express();
 let cookiesFromLogin = null;
 
 app.use(express.json());
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(cors({ origin: "https://cafesnap.netlify.app" }));
 
 app.post("/login", async (_, res) => {
   try {
