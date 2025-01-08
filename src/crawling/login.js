@@ -29,7 +29,7 @@ const loginCrawler = async () => {
       cookieList
     );
   } catch (err) {
-    throw new Error (`로그인 및 쿠키 추출 로직 에러 = ${err.message}`);
+    console.error(`로그인 및 쿠키 추출 로직 에러 = ${err.message}`);
   }
 };
 

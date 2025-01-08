@@ -86,7 +86,7 @@ const getMediaCrawler = async (cookies, cafeInfo) => {
 
     return { success: true, message: returnResultArray, returnUrl };
   } catch (err) {
-    throw new Error(`카페별 미디어 크롤링 로직 에러 = ${err.message}`);
+    console.error(`카페별 미디어 크롤링 로직 에러 = ${err.message}`);
   }
 };
 

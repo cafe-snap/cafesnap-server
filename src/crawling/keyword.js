@@ -84,7 +84,7 @@ const getKeywordCrawler = async (cookies, cafeInfo, keyword) => {
 
     return { success: true, message: returnResultArray };
   } catch (err) {
-    throw new Error(`검색 키워드 미디어 크롤링 로직 에러 = ${err.message}`);
+    console.error(`검색 키워드 미디어 크롤링 로직 에러 = ${err.message}`);
   }
 
 };
