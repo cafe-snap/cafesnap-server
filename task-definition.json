@@ -1,0 +1,38 @@
+{
+  "family": "cafesnap-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::692859936129:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+      {
+          "name": "cafesnap-container",
+          "image": "692859936129.dkr.ecr.ap-northeast-2.amazonaws.com/cafesnap-server:latest",
+          "portMappings": [
+              {
+                  "containerPort": 3000,
+                  "protocol": "tcp"
+              }
+          ],
+          "environment": [
+              {
+                  "name": "NODE_ENV",
+                  "value": "production"
+              },
+              {
+                  "name": "PORT",
+                  "value": "3000"
+              }
+          ],
+          "logConfiguration": {
+              "logDriver": "awslogs",
+              "options": {
+                  "awslogs-group": "/ecs/cafesnap",
+                  "awslogs-region": "ap-northeast-2",
+                  "awslogs-stream-prefix": "ecs"
+              }
+          }
+      }
+  ]
+}
