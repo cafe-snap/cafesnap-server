@@ -1,0 +1,14 @@
+node_modules
+package-lock.json
+.env
+.git
+.gitignore
+README.md
+*.log
+.DS_Store
+.vscode
+.idea
+__tests__
+test
+tests
+coverage
