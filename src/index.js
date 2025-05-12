@@ -10,7 +10,11 @@ const app = express();
 let cookiesFromLogin = null;
 
 app.use(express.json());
-app.use(cors({ origin: "https://cafesnap.netlify.app" }));
+app.use(cors({ 
+  origin: process.env.NODE_ENV === "production"
+    ? ["https://www.cafe-snap.com", "https://cafe-snap.com"]
+    : "http://localhost:5173"
+}));
 
 app.post("/login", async (_, res) => {
   try {
@@ -86,4 +90,7 @@ app.post("/posts/addition", async (req, res) => {
   }
 });
 
-app.listen(3000);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
