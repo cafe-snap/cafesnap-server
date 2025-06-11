@@ -16,6 +16,10 @@ app.use(cors({
     : "http://localhost:5173"
 }));
 
+app.get("/", (req, res) => {
+  res.status(200).send("OK");
+});
+
 app.post("/login", async (_, res) => {
   try {
     cookiesFromLogin = await loginCrawler();
