@@ -40,6 +40,7 @@ WORKDIR /app
 COPY --from=builder /app .
 
 ENV NODE_ENV=production
+ENV PORT=80
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=false
 
