@@ -10,11 +10,15 @@ const app = express();
 let cookiesFromLogin = null;
 
 app.use(express.json());
-app.use(cors({ 
+app.use(cors({
   origin: process.env.NODE_ENV === "production"
     ? ["https://www.cafe-snap.com", "https://cafe-snap.com"]
     : "http://localhost:5173"
 }));
+
+app.get("/health", (req, res) => {
+  res.sendStatus(200);
+});
 
 app.get("/", (req, res) => {
   res.status(200).send("OK");
@@ -95,6 +99,7 @@ app.post("/posts/addition", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
