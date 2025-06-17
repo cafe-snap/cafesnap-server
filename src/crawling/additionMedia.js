@@ -4,7 +4,8 @@ const getadditionMediaCrawler = async (cookies, nextUrl, cafeInfo) => {
   try {
     const browser = await puppeteer.launch({
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      headless: true
+      headless: true,
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH
     });
     const page = await browser.newPage();
 

@@ -31,6 +31,7 @@ RUN apt-get update && apt-get install -y \
     libxdamage1 \
     libxrandr2 \
     xdg-utils \
+    chromium \
     --no-install-recommends && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
@@ -41,7 +42,7 @@ COPY --from=builder /app .
 
 ENV NODE_ENV=production
 ENV PORT=80
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=false
 
 USER pptruser
